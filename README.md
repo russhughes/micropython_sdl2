@@ -62,6 +62,19 @@ Scrolls rainbow-colored mirrored random curves across the display.
 A very simple paint program to demonstrate the use of the mouse as an input
 device.
 
+### pinball.py example
+
+![pinball.py](examples/pinball.png)
+
+ Minimal pinball game in MicroPython based on code from Ten Minute Physics Tutorial
+"How to write a pinball simulation."
+
+Tutorial Links:
+https://matthias-research.github.io/pages/tenMinutePhysics/
+https://youtu.be/NhVUCsXp-Uo
+
+Another example using mouse button events.
+
 ## API REFERENCE
 
 ### SDL2
