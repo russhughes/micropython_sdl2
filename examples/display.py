@@ -4,7 +4,14 @@ create a display object to emulate a graphical display on the screen with
 minimal changes to the code. It also support polling for SDL events,
 like mouse clicks and key presses.
 """
-
+BLACK = const(0x0000)
+BLUE = const(0x001F)
+RED = const(0xF800)
+GREEN = const(0x07E0)
+CYAN = const(0x07FF)
+MAGENTA = const(0xF81F)
+YELLOW = const(0xFFE0)
+WHITE = const(0xFFFF)
 
 import framebuf
 import sdl2
@@ -46,6 +53,10 @@ class Display(framebuf.FrameBuffer):
     def show(self):
         """show the buffer on the display"""
         self.display.show(self.buffer)
+
+    def save(self, file_name):
+        """save the buffer to a BMP """
+        self.display.save(self.buffer, file_name)
 
     def poll_event(self):
         """poll for a SDL_Event and return it"""
