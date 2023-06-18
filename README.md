@@ -172,40 +172,48 @@ otherwise returns None.
 
     (event_type, x, y, button)
 
-    | Index       | Item       | Description
-    |-------------|------------|------------
-    | sdl.EVENT   | event_type | SDL_MOUSEBUTTONDOWN or SDL_MOUSEBUTTONUP
-    | sdl.X       | x          | coordinates of the mouse
-    | sdl.Y       | y          | coordinates of the mouse
-    | sdl.BUTTON  | button     | button pressed or released
+     Index       | Item       | Description
+    -------------|------------|------------
+     sdl.EVENT   | event_type | SDL_MOUSEBUTTONDOWN or SDL_MOUSEBUTTONUP
+     sdl.X       | x          | coordinates of the mouse
+     sdl.Y       | y          | coordinates of the mouse
+     sdl.BUTTON  | button     | button pressed or released
+
+    button constants
+
+     Constant         | Description
+    ------------------|------------
+    SDL_BUTTON_LEFT   | Left button was pressed or released
+    SDL_BUTTON_MIDDLE | Middle button was pressed or released
+    SDL_BUTTON_RIGHT  | Right button waa pressed or released
 
   - SDL_MOUSEWHEEL
 
     (event_type, x, y, direction, preciseX, preciseY, mouseX, mouseY)
 
-    | Index         | Item       | Description
-    |---------------|------------|------------
-    | sdl.EVENT     | event_type | SDL_MOUSEWHEEL
-    | sdl.X         | x          | amount scrolled horizontally
-    | sdl.Y         | y          | amount scrolled vertically
-    | sdl.DIRECTION | direction  | direction of the scroll
-    | sdl.PRECISEX  | preciseX   | amount scrolled horizontally, positive to the right and negative to the left, with float precision
-    | sdl.PRECISEY  | preciseY   | amount scrolled vertically, positive away from the user and negative toward the user, with float precision
-    | sdl.MOUSEX    | mouseX     | X coordinate, relative to window
-    | sdl.MOUSEY    | mouseY     | Y coordinate, relative to window
+     Index         | Item       | Description
+    ---------------|------------|------------
+     sdl.EVENT     | event_type | SDL_MOUSEWHEEL
+     sdl.X         | x          | amount scrolled horizontally
+     sdl.Y         | y          | amount scrolled vertically
+     sdl.DIRECTION | direction  | direction of the scroll
+     sdl.PRECISEX  | preciseX   | amount scrolled horizontally, positive to the right and negative to the left, with float precision
+     sdl.PRECISEY  | preciseY   | amount scrolled vertically, positive away from the user and negative toward the user, with float precision
+     sdl.MOUSEX    | mouseX     | X coordinate, relative to window
+     sdl.MOUSEY    | mouseY     | Y coordinate, relative to window
 
   - SDL_QUIT
 
-    | Index         | Item       | Description
-    |---------------|------------|------------
-    | sdl.EVENT     | event_type | SDL_QUIT
+     Index         | Item       | Description
+    ---------------|------------|------------
+     sdl.EVENT     | event_type | SDL_QUIT
 
 
   - all others return a tuple containing the integer (event_type) id of the event
 
-    | Index         | Item       | Description
-    |---------------|------------|------------
-    | sdl.EVENT     | event_type | integer event_type id
+     Index         | Item       | Description
+    ---------------|------------|------------
+     sdl.EVENT     | event_type | integer event_type id
 
 
 ### deinit()
