@@ -8,6 +8,11 @@
 
 #include <SDL2/SDL.h>
 
+// color565 color bitmasks
+#define COLOR565_R (0xf800)
+#define COLOR565_G (0x07e0)
+#define COLOR565_B (0x001f)
+
 typedef struct _sdl2_obj_t
 {
 	mp_obj_base_t base;
@@ -72,7 +77,7 @@ typedef struct _sdl2_obj_t
 /// #### Raises
 /// - RuntimeError for any SDL2 errors.
 
-STATIC mp_obj_t sdl2_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args)
+static mp_obj_t sdl2_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args)
 {
 	enum
 	{
@@ -87,7 +92,7 @@ STATIC mp_obj_t sdl2_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
         ARG_render_flags,       // The render flags
 	};
 
-	STATIC const mp_arg_t allowed_args[] = {
+	static const mp_arg_t allowed_args[] = {
 		{MP_QSTR_width, MP_ARG_INT, {.u_int = 320}},
 		{MP_QSTR_height, MP_ARG_INT, {.u_int = 240}},
 		{MP_QSTR_x, MP_ARG_OBJ, {.u_int = SDL_WINDOWPOS_CENTERED}},
@@ -158,7 +163,7 @@ STATIC mp_obj_t sdl2_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
 /// - ValueError if the buffer is the wrong size.
 /// - RuntimeError for any SDL2 errors.
 
-STATIC mp_obj_t sdl2_show(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t sdl2_show(size_t n_args, const mp_obj_t *args) {
 	sdl2_obj_t *self = MP_OBJ_TO_PTR(args[0]);
 	mp_buffer_info_t bufinfo;
 	mp_get_buffer(args[1], &bufinfo, MP_BUFFER_READ);
@@ -208,7 +213,7 @@ STATIC mp_obj_t sdl2_show(size_t n_args, const mp_obj_t *args) {
 	SDL_RenderPresent(self->renderer);
 	return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(sdl2_show_obj, 1, 2, sdl2_show);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(sdl2_show_obj, 1, 2, sdl2_show);
 
 /// ### event
 ///
@@ -227,7 +232,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(sdl2_show_obj, 1, 2, sdl2_show);
 ///
 /// #### Event Types:
 
-STATIC mp_obj_t sdl2_poll_event(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t sdl2_poll_event(size_t n_args, const mp_obj_t *args) {
     sdl2_obj_t *self = MP_OBJ_TO_PTR(args[0]);
   	SDL_Event event;
     const char *keyname = "";
@@ -351,7 +356,61 @@ STATIC mp_obj_t sdl2_poll_event(size_t n_args, const mp_obj_t *args) {
 		return mp_const_none;
 	}
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(sdl2_poll_event_obj, 1, 1, sdl2_poll_event);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(sdl2_poll_event_obj, 1, 1, sdl2_poll_event);
+
+/// ### save()
+///
+/// ```python
+/// SDL2.save(framebuf, filename)
+/// ```
+/// #### Description
+///
+/// Save the famebuf to a BMP file.
+///
+/// #### Parameters
+/// - framebuf: framebuf object
+/// - filename: string
+///
+/// #### Example
+///
+
+static mp_obj_t sdl2_save(size_t n_args, const mp_obj_t *args) {
+    sdl2_obj_t *self = MP_OBJ_TO_PTR(args[0]);
+	mp_buffer_info_t bufinfo;
+	mp_get_buffer(args[1], &bufinfo, MP_BUFFER_READ);
+
+    // Check that there is a buffer.
+    if (bufinfo.buf == NULL) {
+        mp_raise_msg(&mp_type_ValueError, MP_ERROR_TEXT("no buffer"));
+    }
+
+    // Check the buffer size.
+    if (bufinfo.len != (unsigned) self->width * self->height * 2) {
+        mp_raise_msg(&mp_type_ValueError, MP_ERROR_TEXT("buffer size mismatch"));
+    }
+
+    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(
+        bufinfo.buf,
+        self->width,
+        self->height,
+        16,
+        self->width * 2,
+        COLOR565_R,
+        COLOR565_G,
+        COLOR565_R,
+        0);
+
+    if (surface == NULL) {
+        mp_raise_msg(&mp_type_ValueError, MP_ERROR_TEXT("could not create surface for save"));
+    }
+
+    if (SDL_SaveBMP(surface, mp_obj_str_get_str(args[2])) != 0) {
+        mp_raise_msg(&mp_type_ValueError, MP_ERROR_TEXT("could not save surface"));
+    }
+    return mp_const_none;
+}
+
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(sdl2_save_obj, 3, 3, sdl2_save);
 
 /// ### deinit()
 ///
@@ -363,19 +422,20 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(sdl2_poll_event_obj, 1, 1, sdl2_poll_
 /// Deinitialize SDL2, removes all SDL2 windows.
 ///
 
-STATIC mp_obj_t sdl2_deinit(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t sdl2_deinit(size_t n_args, const mp_obj_t *args) {
     SDL_Quit();
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(sdl2_deinit_obj, 1, 1, sdl2_deinit);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(sdl2_deinit_obj, 1, 1, sdl2_deinit);
 
-STATIC const mp_rom_map_elem_t sdl2_locals_dict_table[] = {
+static const mp_rom_map_elem_t sdl2_locals_dict_table[] = {
 	{MP_ROM_QSTR(MP_QSTR_show), MP_ROM_PTR(&sdl2_show_obj)},
 	{MP_ROM_QSTR(MP_QSTR_poll_event), MP_ROM_PTR(&sdl2_poll_event_obj)},
+    {MP_ROM_QSTR(MP_QSTR_save), MP_ROM_PTR(&sdl2_save_obj)},
     {MP_ROM_QSTR(MP_QSTR_deinit), MP_ROM_PTR(&sdl2_deinit_obj)},
 };
 
-STATIC MP_DEFINE_CONST_DICT(sdl2_locals_dict, sdl2_locals_dict_table);
+static MP_DEFINE_CONST_DICT(sdl2_locals_dict, sdl2_locals_dict_table);
 
 MP_DEFINE_CONST_OBJ_TYPE(
 	sdl2_type_t,
@@ -385,7 +445,7 @@ MP_DEFINE_CONST_OBJ_TYPE(
 	locals_dict, &sdl2_locals_dict);
 
 // Define all properties of the module.
-STATIC const mp_rom_map_elem_t sdl2_module_globals_table[] = {
+static const mp_rom_map_elem_t sdl2_module_globals_table[] = {
 	{MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_sdl2)},
 	{MP_ROM_QSTR(MP_QSTR_SDL2), MP_ROM_PTR(&sdl2_type_t)},
 
@@ -456,7 +516,7 @@ STATIC const mp_rom_map_elem_t sdl2_module_globals_table[] = {
 	{MP_ROM_QSTR(MP_QSTR_SDL_QUIT), MP_ROM_INT(SDL_QUIT)},
 };
 
-STATIC MP_DEFINE_CONST_DICT(sdl2_module_globals, sdl2_module_globals_table);
+static MP_DEFINE_CONST_DICT(sdl2_module_globals, sdl2_module_globals_table);
 
 // Define module object.
 const mp_obj_module_t sdl2_user_cmodule = {
